@@ -185,12 +185,12 @@ before upgrading to 0.5+ and be aware that it will generate new caches.
 
 
 import logging
+from datetime import datetime
 from beaker.container import NamespaceManager, Container
 from beaker.exceptions import InvalidCacheBackendError, MissingCacheParameter
 from beaker.synchronization import file_synchronizer
 from beaker.util import verify_directory, SyncDict
 
-from StringIO import StringIO
 try:
     import cPickle as pickle
 except ImportError:
@@ -387,12 +387,13 @@ class MongoDBNamespaceManager(NamespaceManager):
 
             doc['data'] = value
             doc['_id'] = _id
+            doc['mt'] = datetime.now()
             if expiretime:
                 # TODO - What is the datatype of this? it should be instantiated as a datetime instance
                 doc['valid_until'] = expiretime
         else:
             _id = self.namespace
-            doc['$set'] = {'data.' + key: value}
+            doc['$set'] = {'data.' + key: value, 'mt': datetime.now()}
             if expiretime:
                 # TODO - What is the datatype of this? it should be instantiated as a datetime instance
                 doc['$set']['valid_until'] = expiretime
